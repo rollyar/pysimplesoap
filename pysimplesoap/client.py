@@ -841,7 +841,7 @@ class SoapClient(object):
                 filename_pkl = os.path.join(cache, filename_pkl)
             if os.path.exists(filename_pkl):
                 log.debug('Unpickle file %s' % (filename_pkl, ))
-                f = open(filename_pkl, 'r')
+                f = open(filename_pkl, 'rb')
                 pkl = pickle.load(f)
                 f.close()
                 # sanity check:
