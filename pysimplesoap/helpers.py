@@ -611,6 +611,11 @@ class Struct(dict):
         self.refers_to = None    # "symbolic linked" struct
         self.qualified = None
 
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if '_Struct__keys' not in self.__dict__:
+            self._Struct__keys = []
+
     def __setitem__(self, key, value):
         if key not in self.__keys:
             self.__keys.append(key)
