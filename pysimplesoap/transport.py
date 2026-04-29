@@ -16,7 +16,15 @@
 import logging
 import ssl
 import sys
-from distutils.version import LooseVersion
+try:
+    from distutils.version import LooseVersion
+except ImportError:
+    class LooseVersion:
+        def __init__(self, v): self.v = tuple(int(x) for x in str(v).split('.')[:3] if x.isdigit())
+        def __le__(self, o): return self.v <= o.v
+        def __ge__(self, o): return self.v >= o.v
+        def __lt__(self, o): return self.v < o.v
+        def __gt__(self, o): return self.v > o.v
 
 try:
     import urllib2
