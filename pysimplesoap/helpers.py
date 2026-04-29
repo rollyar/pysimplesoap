@@ -602,19 +602,18 @@ if str not in TYPE_MAP:
 class Struct(dict):
     """Minimal ordered dictionary to represent elements (i.e. xsd:sequences)"""
 
+    def __new__(cls, *args, **kwargs):
+        obj = super().__new__(cls)
+        obj._Struct__keys = []  # must exist before __setitem__ (pickle restores dict items before __setstate__)
+        return obj
+
     def __init__(self, key=None):
         self.key = key
-        self.__keys = []
         self.array = False
         self.namespaces = {}     # key: element, value: namespace URI
         self.references = {}     # key: element, value: reference name
         self.refers_to = None    # "symbolic linked" struct
         self.qualified = None
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        if '_Struct__keys' not in self.__dict__:
-            self._Struct__keys = []
 
     def __setitem__(self, key, value):
         if key not in self.__keys:
