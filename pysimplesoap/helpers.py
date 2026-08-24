@@ -66,7 +66,13 @@ def fetch(url, http, cache=False, force_download=False, wsdl_basedir='', headers
         f = open(filename, 'rb')
         xml = f.read()
         f.close()
+        if not xml.strip():
+            # ignore empty cached files (e.g. left over by a failed download):
+            log.warning('Ignoring empty cached file %s, fetching again' % filename)
+            xml = None
     else:
+        xml = None
+    if xml is None:
         if url_scheme == 'file':
             log.info('Fetching url %s using urllib2' % url)
             f = urllib2.urlopen(url)
@@ -74,13 +80,16 @@ def fetch(url, http, cache=False, force_download=False, wsdl_basedir='', headers
         else:
             log.info('GET %s using %s' % (url, http._wrapper_version))
             response, xml = http.request(url, 'GET', None, headers)
+        if hasattr(xml, 'encode'):
+            xml = xml.encode('utf8')
+        if not xml.strip():
+            # do not cache (nor try to parse) an empty response:
+            raise RuntimeError("Empty response fetching %s" % url)
         if cache:
             log.info('Writing file %s' % filename)
             if not os.path.isdir(cache):
                 os.makedirs(cache)
             f = open(filename, 'wb')
-            if not isinstance(xml, bytes):
-                xml = xml.encode('utf8')
             f.write(xml)
             f.close()
     return xml
